@@ -1,4 +1,4 @@
-const { NotFoundError, WrongParametersError } = require("./errors");
+const { CustomError } = require("./errors");
 
 const asyncWrapper = (controller) => {
   return (req, res, next) => {
@@ -7,7 +7,7 @@ const asyncWrapper = (controller) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-  if (err instanceof NotFoundError || err instanceof WrongParametersError) {
+  if (err instanceof CustomError) {
     return res.status(err.status).json(err.message);
   }
 

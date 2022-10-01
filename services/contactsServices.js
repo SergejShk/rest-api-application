@@ -1,9 +1,9 @@
 const { Contacts } = require("../db/contactsModel");
 const { NotFoundError, WrongParametersError } = require("../helpers/errors");
 
-const getContacts = async () => {
+const getContacts = async (owner) => {
   try {
-    const contacts = await Contacts.find({});
+    const contacts = await Contacts.find({ owner });
 
     return contacts;
   } catch (error) {
@@ -11,9 +11,12 @@ const getContacts = async () => {
   }
 };
 
-const getContactById = async (contactId) => {
+const getContactById = async (contactId, owner) => {
   try {
-    const contact = await Contacts.findById(contactId);
+    const contact = await Contacts.findOne({
+      _id: contactId,
+      owner,
+    });
 
     if (!contact) {
       throw new NotFoundError("Not found");
@@ -25,13 +28,14 @@ const getContactById = async (contactId) => {
   }
 };
 
-const addContact = async ({ name, email, phone, favorite }) => {
+const addContact = async ({ name, email, phone, favorite }, owner) => {
   try {
     const contact = new Contacts({
       name,
       email,
       phone,
       favorite,
+      owner,
     });
 
     await contact.save();
@@ -42,11 +46,20 @@ const addContact = async ({ name, email, phone, favorite }) => {
   }
 };
 
-const updateContact = async (contactId, { name, email, phone, favorite }) => {
+const updateContact = async (
+  contactId,
+  owner,
+  { name, email, phone, favorite }
+) => {
+  console.log(contactId);
+  console.log(owner);
   try {
-    const updatedContact = await Contacts.findByIdAndUpdate(contactId, {
-      $set: { name, email, phone, favorite },
-    });
+    const updatedContact = await Contacts.findOneAndUpdate(
+      { _id: contactId, owner },
+      {
+        $set: { name, email, phone, favorite },
+      }
+    );
 
     if (!updatedContact) {
       throw new NotFoundError("Not found");
@@ -58,13 +71,14 @@ const updateContact = async (contactId, { name, email, phone, favorite }) => {
   }
 };
 
-const updateStatusContact = async (contactId, body) => {
+const updateStatusContact = async (contactId, owner, body) => {
   const { favorite } = body;
 
   try {
-    const updatedContact = await Contacts.findByIdAndUpdate(contactId, {
-      $set: { favorite },
-    });
+    const updatedContact = await Contacts.findOneAndUpdate(
+      { _id: contactId, owner },
+      { $set: { favorite } }
+    );
 
     if (!updatedContact) {
       throw new NotFoundError("Not found");
@@ -76,9 +90,12 @@ const updateStatusContact = async (contactId, body) => {
   }
 };
 
-const removeContact = async (contactId) => {
+const removeContact = async (contactId, owner) => {
   try {
-    const removedContact = await Contacts.findByIdAndRemove(contactId);
+    const removedContact = await Contacts.findOneAndRemove({
+      _id: contactId,
+      owner,
+    });
 
     if (!removedContact) {
       throw new NotFoundError("Not found");
