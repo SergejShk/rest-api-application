@@ -9,7 +9,9 @@ const {
 } = require("../services/contactsServices");
 
 const listContactsController = async (req, res) => {
-  const contacts = await getContacts();
+  const { _id: owner } = req.user;
+
+  const contacts = await getContacts(owner);
 
   return res.status(200).json({
     data: contacts,
@@ -18,8 +20,9 @@ const listContactsController = async (req, res) => {
 
 const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
+  const { _id: owner } = req.user;
 
-  const contact = await getContactById(contactId);
+  const contact = await getContactById(contactId, owner);
 
   return res.status(200).json({
     contact,
@@ -28,19 +31,19 @@ const getContactByIdController = async (req, res) => {
 
 const addContactController = async (req, res) => {
   const { name, email, phone, favorite } = req.body;
+  const { _id: owner } = req.user;
 
-  const contact = await addContact({ name, email, phone, favorite });
+  const contact = await addContact({ name, email, phone, favorite }, owner);
 
-  return res.status(201).json({
-    contact,
-  });
+  return res.status(201).json({ contact });
 };
 
 const updateContactController = async (req, res) => {
   const { name, email, phone, favorite } = req.body;
   const { contactId } = req.params;
+  const { _id: owner } = req.user;
 
-  const updatedContact = await updateContact(contactId, {
+  const updatedContact = await updateContact(contactId, owner, {
     name,
     email,
     phone,
@@ -54,20 +57,22 @@ const updateContactController = async (req, res) => {
 
 const updateFavoriteController = async (req, res) => {
   const { contactId } = req.params;
+  const { _id: owner } = req.user;
 
   if (!req.body) {
     throw new WrongParametersError("missing field favorite");
   }
 
-  const contact = await updateStatusContact(contactId, req.body);
+  const contact = await updateStatusContact(contactId, owner, req.body);
 
   return res.status(200).json({ contact });
 };
 
 const removeContactController = async (req, res) => {
   const { contactId } = req.params;
+  const { _id: owner } = req.user;
 
-  await removeContact(contactId);
+  await removeContact(contactId, owner);
 
   return res.status(200).json({ message: "contact deleted" });
 };

@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 
 const contactsSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: "user",
+  },
   name: {
     type: String,
     minlength: 3,
     maxlength: 30,
-    unique: true,
     required: [true, "Set name for contact"],
   },
   email: {

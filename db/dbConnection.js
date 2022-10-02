@@ -1,11 +1,9 @@
 const mongoose = require("mongoose");
-
-const url =
-  "mongodb+srv://serhii-ssh:firstcluster@cluster0.qmv4cuu.mongodb.net/phonebook?retryWrites=true&w=majority";
+require("dotenv").config();
 
 const connectMongo = async () => {
   try {
-    return await mongoose.connect(url, {
+    return await mongoose.connect(process.env.DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
