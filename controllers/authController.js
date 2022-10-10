@@ -3,6 +3,7 @@ const {
   login,
   getUserById,
   logout,
+  uploadAvatar,
 } = require("../services/authService");
 const { UnauthorizedError } = require("../helpers/errors");
 
@@ -16,6 +17,7 @@ const signupController = async (req, res) => {
   res.status(201).json({
     user: {
       email: data.email,
+      avatarURL: data.avatarURL,
       subscription,
     },
   });
@@ -63,9 +65,20 @@ const currentController = async (req, res) => {
   });
 };
 
+const uploadAvatarController = async (req, res) => {
+  const { _id: userId } = req.user;
+
+  const user = await uploadAvatar(userId, req.file);
+
+  const { avatarURL } = user;
+
+  res.status(200).json({ avatarURL });
+};
+
 module.exports = {
   signupController,
   loginController,
   logoutController,
   currentController,
+  uploadAvatarController,
 };

@@ -1,7 +1,11 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
+const path = require("path");
+const fs = require("fs/promises");
 require("dotenv").config();
 const { User } = require("../db/userModel");
+const { updateAvatar } = require("../helpers/updateAvatar");
 const {
   UnauthorizedError,
   RegistrationConflictError,
@@ -10,7 +14,7 @@ const {
 
 const signup = async (email, password) => {
   try {
-    const user = new User({ email, password });
+    const user = new User({ email, password, avatarURL: gravatar.url(email) });
 
     await user.save();
     return user;
@@ -63,9 +67,39 @@ const getUserById = async (userId) => {
   }
 };
 
+const uploadAvatar = async (userId, file) => {
+  try {
+    const { path: tmpDir, originalname } = file;
+    const [extension] = originalname.split(".").reverse();
+    const newNameAvatar = `${userId}.${extension}`;
+
+    console.log(updateAvatar);
+    await updateAvatar(file, tmpDir);
+
+    const uploadDir = path.join(
+      __dirname,
+      "../",
+      "public",
+      "avatars",
+      newNameAvatar
+    );
+
+    await fs.rename(tmpDir, uploadDir);
+
+    return await User.findByIdAndUpdate(
+      userId,
+      { avatarURL: path.join("avatars", newNameAvatar) },
+      { new: true }
+    );
+  } catch (error) {
+    throw new WrongParametersError(error.message);
+  }
+};
+
 module.exports = {
   signup,
   login,
   logout,
   getUserById,
+  uploadAvatar,
 };
