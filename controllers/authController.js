@@ -4,6 +4,8 @@ const {
   getUserById,
   logout,
   uploadAvatar,
+  confirmEmail,
+  resendEmail,
 } = require("../services/authService");
 const { UnauthorizedError } = require("../helpers/errors");
 
@@ -75,10 +77,24 @@ const uploadAvatarController = async (req, res) => {
   res.status(200).json({ avatarURL });
 };
 
+const verifyController = async (req, res) => {
+  await confirmEmail(req.params.verificationToken);
+
+  res.status(200).json({ message: "Verification successful" });
+};
+
+const verifyResendController = async (req, res) => {
+  await resendEmail(req.body.email);
+
+  res.status(200).json("Verification email sent");
+};
+
 module.exports = {
   signupController,
   loginController,
   logoutController,
   currentController,
   uploadAvatarController,
+  verifyController,
+  verifyResendController,
 };

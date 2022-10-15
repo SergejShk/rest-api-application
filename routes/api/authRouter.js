@@ -8,9 +8,12 @@ const {
   logoutController,
   currentController,
   uploadAvatarController,
+  verifyController,
+  verifyResendController,
 } = require("../../controllers/authController");
 const { validateAuth } = require("../../middlewares/validateMiddleware");
 const { authMiddleware } = require("../../middlewares/authMiddleware");
+const { resendVerify } = require("../../middlewares/resendMiddleware");
 
 const router = express.Router();
 
@@ -28,5 +31,9 @@ router.patch(
   uploadMiddleware.single("avatar"),
   asyncWrapper(uploadAvatarController)
 );
+
+router.get("/verify/:verificationToken", asyncWrapper(verifyController));
+
+router.post("/verify/", resendVerify, asyncWrapper(verifyResendController));
 
 module.exports = { authRouter: router };
